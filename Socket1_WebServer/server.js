@@ -1,13 +1,29 @@
-const net = require('net');
+const Net = require('net');
 
 const port = process.port || 8080;
+const host = '127.0.0.1';
 
-const server = net.createServer((socket) => {
-  socket.on('data', (res) => {
-    console.log(res);
+const server = new Net.Server();
+
+
+server.on('connection', (socket) => {
+  console.log('a new connection has been established.\n');
+
+  socket.on('data', (chunk) => {
+    console.log(`received data from client: ${chunk.toString()}`);
+    socket.write(chunk.toString());
+    socket.end();
+  });
+
+  socket.on('end', () => {
+    console.log('Closing connection with the client.\n');
   });
 });
 
-server.listen(port, () => {
-  console.log(`server is runing on port ${port}`);
+server.on('error', (err) => {
+  console.log(err);
+});
+
+server.listen(port, host, () => {
+  console.log(`server is runing on port ${port}\n`);
 });

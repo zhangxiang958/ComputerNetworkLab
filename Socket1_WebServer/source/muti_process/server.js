@@ -44,15 +44,25 @@ server.on('error', (err) => {
   console.log(err);
 });
 
-// server.listen(port, host, () => {
-//   console.log(`server is runing on port ${port}\n`);
-// });
-
+let worker;
 process.on('message', (message, tcp) => {
   if(message == 'server') {
+    worker = tcp;
     tcp.on('connection', (socket) => {
       console.log(`handled by process ${process.pid}`);
       server.emit('connection', socket);
     });
   }
+});
+
+process.on('uncaughtExeption', (err) => {
+  console.log(err);
+  process.send({ act: 'suicide' });
+  worker.close(() => {
+    process.exit(1);
+  });
+
+  setTimeout(() => {
+    process.exit(1);
+  }, 5000);
 });

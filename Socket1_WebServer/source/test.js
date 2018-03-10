@@ -2,23 +2,25 @@
 
 const http = require('http')
 
-function createRequest() {
+function createRequest(i) {
   return new Promise((resolve) => {
-    http.get('http://localhost:8081/', (res) => {
-      res.on('data', (data) => {
-        console.log(data.toString());
+    setTimeout(() => {
+      http.get('http://localhost:8081/', (res) => {
+        res.on('data', (data) => {
+          console.log(data.toString());
+        });
+        res.on('end', () => {
+          resolve();
+        });
       });
-      res.on('end', () => {
-        resolve();
-      });
-    });
+    }, 0);
   });
 }
 
 const promises = [];
 
-for(let i = 0; i < 10; i ++) {
-  promises.push(createRequest());
+for(let i = 0; i < 4; i ++) {
+  promises.push(createRequest(i + 1));
 }
 
 let start = Date.now();

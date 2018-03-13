@@ -17,7 +17,8 @@ server.on('connection', async (socket) => {
   const start = Date.now();
   let path;
   
-  await sleep(3);
+  // await sleep(3);
+  doSomething();
   socket.write(`${Header}\n ${helloworldFile}`, 'binary');
   
   socket.on('data', (chunk) => {
@@ -42,6 +43,11 @@ server.listen(port, host, () => {
   console.log(`server is runing on port ${port}\n`);
 });
 
+function doSomething() {
+  Array.from({ length: 100000 }).forEach(value => {
+    return value * value * value
+  })
+}
 
 function sleep (second) {
   second = parseInt(second, 10);

@@ -4,11 +4,13 @@ const socket = dgram.createSocket('udp4');
 socket.on('message', (msg, receiver) => {
   let rand = Math.round( Math.random() * 10 );
   if(rand < 4) {
-    console.log('miss package...');
+    console.log('请求超时');
     return;
   }
   console.log(`receiver msg: ${msg} from ${receiver.address}:${receiver.port}`);
-  socket.send('received', 0, 8, receiver.port, receiver.address, (err, bytes) => {});
+  msg = msg.toString().split(' ');
+  let sendMessage = `received Ping ${msg[1]}`;
+  socket.send(sendMessage, 0, sendMessage.length, receiver.port, receiver.address, (err, bytes) => {});
 });
 
 socket.on('listening', () => {

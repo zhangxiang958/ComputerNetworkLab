@@ -2,8 +2,8 @@ const dgram = require('dgram');
 const socket = dgram.createSocket('udp4');
 
 const heartbeat = {};
-const checkPeriod = 150;
-const checkTimeout = 60000;
+const checkPeriod = 1500;
+const checkTimeout = 6000;
 
 socket.on('message', (msg, receiver) => {
   let rand = Math.round( Math.random() * 10 );
@@ -37,8 +37,9 @@ socket.bind(8900);
 setInterval(() => {
   Object.keys(heartbeat).forEach((address) => {
     let time = heartbeat[address];
-    if(new Date() - time < checkTimeout) {
+    if(new Date() - time > checkTimeout) {
       console.log(`${address} slient.`);
+      Reflect.deleteProperty(heartbeat, address);
     }
   });
 }, checkPeriod);

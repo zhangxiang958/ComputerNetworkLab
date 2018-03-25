@@ -1,0 +1,19 @@
+{
+  "QQ": {
+    "host": "qq",
+    "auth": {
+      "user": "958033967@qq.com",
+      "pass": "svkqjrmfeitlbbbe"
+    },
+    "secure": true
+  },
+  "debug": {
+    "host": "debugmail.io",
+    "port": 25,
+    "auth": {
+      "user": "jarvis958033967@gmail.com",
+      "pass": "9dc92160-2f30-11e8-85da-ab2a4bde2f81"
+    },
+    "secure": false
+  }
+}

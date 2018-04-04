@@ -15,5 +15,14 @@
       "pass": "9dc92160-2f30-11e8-85da-ab2a4bde2f81"
     },
     "secure": false
+  },
+  "debugForQQ": {
+    "host": "debugmail.io",
+    "port": 25,
+    "auth": {
+      "user": "958033967@qq.com",
+      "pass": "5a6d9f60-375d-11e8-8d43-8f9c220cf33d"
+    },
+    "secure": true
   }
 }

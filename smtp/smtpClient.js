@@ -1,4 +1,5 @@
 const util = require('util');
+const path = require('path');
 const { promisify } = util;
 
 const Mail = require('./mailer.js');
@@ -26,5 +27,9 @@ mail.sendMail({
   to: '958033967@qq.com',
   subject: 'test',
   text: 'fucker sender',
-  html: '<h1>Fuck YOU!!!</h1>'
+  html: '<h1>Fuck YOU!!!</h1>',
+  attachment: [
+    path.resolve(__dirname, './smtp.json'),
+    path.resolve(__dirname, './file/99.png')
+  ]
 });

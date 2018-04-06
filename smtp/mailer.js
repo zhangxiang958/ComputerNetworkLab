@@ -1,4 +1,5 @@
 const Net = require('net');
+const fs = require('fs');
 const EventEmitter = require('events');
 
 const msgEnd = '\r\n';
@@ -44,8 +45,8 @@ module.exports = class Mail extends EventEmitter {
           this.emit('verifyAccount', message[0]);
           break;
         case '354':
-          const { text, html } = this.content;
-          this.emit('data', { text, html });
+          const { text, html, attachment } = this.content;
+          this.emit('data', { text, html, attachment });
           break;
         case '221':
           this.socket.end();
@@ -113,15 +114,32 @@ module.exports = class Mail extends EventEmitter {
     socket.write(`RCPT TO:${address}${msgEnd}`);
   }
 
-  data ({ text, html }) {
+  static handleFile ({ path, boundary, mimeVersion }, socket) {
+    return new Promise((resolve, reject) => {
+      let filename = path.replace(/^.*[/\\]/,'').toLowerCase();
+      let fileStream = fs.createReadStream(path, { encoding: 'base64' });
+      socket.write(`\n--${boundary}\n`);
+      socket.write('Content-Type: application/octet-stream\n');
+      socket.write(`MIME-Version:${mimeVersion}\n`);
+      socket.write('Content-Transfer-Encoding: base64\n');
+      socket.write(`Content-Disposition: attachment; filename="${filename}"\n\n`);
+      fileStream.pipe(socket, { end: false });
+      fileStream.on('end', () => {
+        socket.write(`${msgEnd}`);
+        resolve();
+      });
+    });
+  }
+
+  async data ({ text, html, attachment }) {
     const { socket } = this;
     if (!text) {
       socket.write(`DATA${msgEnd}`);
     } else {
       const keys = Object.keys(this.content);
       const mimeVersion = '1.0';
-      const boundary = `====${(Math.random() * 100000).toFixed()}====`;
-      socket.write(`Content-Type:multipart/alternative;\n boundary="${boundary}"${msgEnd}`);
+      const boundary = `========${(Math.random() * 10000000000000).toFixed()}==`;
+      socket.write(`Content-Type:multipart/mixed;\n boundary="${boundary}"${msgEnd}`);
       socket.write(`MIME-Version: ${mimeVersion}${msgEnd}`);
       for (let key of keys) {
         switch (key) {
@@ -146,21 +164,32 @@ module.exports = class Mail extends EventEmitter {
             socket.write(`MIME-Version:${mimeVersion}\n`);
             socket.write(`\n${html}${msgEnd}`);
             break;
+          case 'attachment':
+            const filePaths = attachment;
+            const fileNum = attachment.length;
+            for (let path of filePaths) {
+              await Mail.handleFile({ path, boundary, mimeVersion }, socket);
+            }
+            break;
           default:
             break;
         }
       }
-      socket.write(`.${msgEnd}`);
+      socket.write(`\n--${boundary}--\n${msgEnd}`);
+      socket.write(`${msgEnd}.${msgEnd}`);
     }
   }
 
-  sendMail ({ from, to = '', subject = '', text, html }, callback) {
+  sendMail ({ from, to = '', subject = '', text, html, attachment }, callback) {
+    to = Array.isArray(to) ? to : to.split(' ');
+    attachment = Array.isArray(attachment) ? attachment : [];
     this.content = {
       from,
-      to: Array.isArray(to) ? to : to.split(' '),
+      to,
       subject,
       text,
-      html
+      html,
+      attachment
     }
     this.connect(this.host, this.port);
   }

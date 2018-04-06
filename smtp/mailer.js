@@ -1,17 +1,18 @@
 const Net = require('net');
+const Tls = require('tls');
 const fs = require('fs');
 const EventEmitter = require('events');
 
 const msgEnd = '\r\n';
 
 module.exports = class Mail extends EventEmitter {
-  constructor({ host, port, auth }) {
+  constructor({ host, port, auth, secure }) {
     super();
     
     this.host = host;
     this.port = port;
     this.auth = auth;
-    this.socket = new Net.Socket();
+    this.socket = secure ? new Tls.TLSSocket() : new Net.Socket();
     this.operation = [];
 
     this.socket.on('data', (data) => {
@@ -55,7 +56,11 @@ module.exports = class Mail extends EventEmitter {
           break;
       }
     });
-
+    
+    this.socket.on('error', (msg) => {
+      console.log(`[socket error]: ${msg}`);
+    });
+    
     this.on('connect', this.connect);
     this.on('auth', this.login);
     this.on('verifyAccount', this.verify);

@@ -1,9 +1,10 @@
 {
   "QQ": {
-    "host": "qq",
+    "host": "smtp.qq.com",
+    "port": 465,
     "auth": {
       "user": "958033967@qq.com",
-      "pass": "svkqjrmfeitlbbbe"
+      "pass": "qxpnlvdenzdubbji"
     },
     "secure": true
   },

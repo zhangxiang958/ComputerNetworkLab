@@ -1,0 +1,39 @@
+HTTP/1.1 200 OK
+Server: nginx/1.4.6 (Ubuntu)
+Date: Sun, 20 May 2018 13:14:43 GMT
+Content-Type: text/html
+Content-Length: 7057
+Last-Modified: Sat, 24 Sep 2016 01:25:44 GMT
+Connection: keep-alive
+ETag: "57e5d618-1b91"
+Expires: Wed, 23 May 2018 13:14:43 GMT
+Cache-Control: max-age=259200
+Accept-Ranges: bytes
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="screen-orientation" content="portrait">
+	<script src="js/flexible_css.debug.js"></script>
+	<script src="js/flexible.debug.js"></script>
+	<link rel="stylesheet" href="css/jquery.fullPage.css">
+	<link rel="stylesheet" href="css/index.css">
+</head>
+<body class="section">
+	<div class="loading">
+		<div class="progress">                              
+			<div class="progress-bar" role="progressbar" style="width: 40%"></div>
+		</div>
+	</div>
+	<div class="index slide">
+		<img src="http://7xkopm.com1.z0.glb.clouddn.com/0.shouye/first-text.png" alt="">
+	</div>
+	<div class="introduce slide" id="int-slide">
+		<img src="http://7xns9g.com1.z0.glb.clouddn.com/index-text2.png"alt="" id="int-show">
+	</div>
+	<div class="footBall slide" id="fb-slide">
+		<div class="fb-tap" id="football-tap">
+			<img src=

@@ -3,8 +3,8 @@ const fs = require('fs');
 const path = require('path');
 
 const server = new Net.Server();
-const PORT = 3000;
 const HOST = '127.0.0.1';
+const PORT = 3000;
 
 const parseRequestObj = (requestHeaders, socket) => {
   requestHeaders = requestHeaders.split('\r\n');
@@ -105,6 +105,7 @@ const parseReponseObj = (request) => {
 const connectToRealServer = (request) => {
   const [host, port = 80] = request.headers.host.split(':');
   const socket = Net.createConnection(port, host);
+  socket.on('error', (err) => { console.log(err); });
   return socket;
 };
 
@@ -114,24 +115,48 @@ const setupProxy = (request, response, data) => {
   const filePath = path.resolve(__dirname, `./cache/${request.url.split('//')[1].replace(/\//g, '_')}`);
   if (fs.existsSync(filePath)) {
     console.log('fucking exist');
+    socketToClient.write('HTTP/1.1 200 OK\r\nServer: my-fucking-server\r\n\r\n');
     const readStream = fs.createReadStream(filePath);
     readStream.pipe(socketToClient);
     return;
   }
   const writeStream = fs.createWriteStream(filePath);
+  let dataBuf = new Buffer('');
 
-  socketToServer.on('data', (buf) => {
-    writeStream.write(buf);
+  socketToServer.once('data', (buf) => {
+    dataBuf = Buffer.concat([dataBuf, buf]);
+    let endFlag = dataBuf.indexOf('\r\n\r\n');
+    let header;
+    let hasHeader = false;
+    let request;
+    if (endFlag !== -1) {
+      header = dataBuf.slice(0, endFlag).toString();
+      hasHeader = true;
+      let lines = header.split('\r\n');
+      let [version, code, msg] = lines[0].split(' ');
+      if (+code === 404 || +code > 500) {
+        socketToClient.end('HTTP/1.1 404 Not Found\r\n');
+        return;
+      } else if (+code > 500) {
+        socketToClient.end('HTTP/1.1 500 Server Error\r\n');
+        return;
+      }
+    }
+    hasHeader && writeStream.write(buf);
     socketToClient.write(buf);
   });
-  socketToClient.on('data', (buf) => { 
+  
+  socketToClient.once('data', (buf) => {
     socketToServer.write(buf); 
   });
+
   socketToServer.write(data);
 };
 
 
 const handleConnection = (socket) => {
+  socket.on('error', (err) => { console.log(err); });
+
   socket.once('readable', () => {
 
     let reqBuffer = new Buffer('');
@@ -166,7 +191,7 @@ const handleConnection = (socket) => {
     const response = parseReponseObj(request);
     // 重新设置 reqBuf 的值以接收 body
     reqBuffer = new Buffer('');
-    // 处理 body
+    // // 处理 body
     while ((buf = socket.read()) !== null) {
       reqBuffer = Buffer.concat([reqBuffer, buf]);
     }
